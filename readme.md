@@ -2,6 +2,8 @@
 
 <b>Compiling instructions</b>
 
+   download <a href=http://eigen.tuxfamily.org/index.php?title=Main_Page>Eigen</a> C++ template library. 
+   rest of the dependencies are available in dependencies folder.
    CMakeLists.txt is provided for cmake to generate makefiles. General
    practice using cmake should be followed in order to compile the
    program. Suggested steps to compile under Debug mode are shown below.
