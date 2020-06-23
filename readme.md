@@ -57,4 +57,5 @@ if you are also interested in MPEG metric D1 and D2 use the following example:
  ```
 
 <b> Reference </b>
+
    If you are using this metric, please cite this publication.
