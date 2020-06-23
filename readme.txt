@@ -1,5 +1,7 @@
+#Point to Distribution Metric
 
-1. Compiling instructions
+<b>Compiling instructions</b>
+
    CMakeLists.txt is provided for cmake to generate makefiles. General
    practice using cmake should be followed in order to compile the
    program. Suggested steps to compile under Debug mode are shown below.
@@ -20,7 +22,7 @@
    :$ make
    "pc_error_d" to be generated under ./test folder
 
-2. usage
+<b> usage </b>
 
 ```console
 ./test/pc_error  [--help] [-c config.cfg] [--parameter=value]
@@ -50,5 +52,5 @@ if you are also interested in MPEG metric D1 and D2 use the following example:
  --color=1 
  --resolution=1023
 
-3. Reference
+<b> Reference </b>
    If you are using this metric, please cite this publication.
