@@ -1,0 +1,19 @@
+bin/*
+build/*
+lib/*
+doc/html
+doc/latex
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+.project
+.cproject
+Makefile
+test/pc_error
+test/pc_error.exe
+
+
+# Created files
+*.ply
+*.yuv
+
