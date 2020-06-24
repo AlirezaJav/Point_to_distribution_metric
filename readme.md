@@ -45,17 +45,17 @@
    The outputs are writing in the terminal as trace and can be catch in log files. 
 
    Example:
-
+   
    ```console
    ./test/pc_error 
-    --fileA=./queen/frame_0010.ply 
-    --fileB=./S22C2AIR01_queen_dec_0010.ply 
-    --distSize=31
-    --resolution=1023
+   --fileA=./queen/frame_0010.ply 
+   --fileB=./S22C2AIR01_queen_dec_0010.ply 
+   --distSize=31
+   --resolution=1023
    ```
- 
+   
    * Note that distSize has a default value of 31
-
+   
    if you are also interested in MPEG metric D1 and D2 use the following example:
    ```console
    ./test/pc_error 
