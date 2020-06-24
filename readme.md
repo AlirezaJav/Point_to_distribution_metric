@@ -52,7 +52,7 @@
     --fileB=./S22C2AIR01_queen_dec_0010.ply 
     --distSize=31
     --resolution=1023
-    ```
+   ```
  
    * Note that distSize has a default value of 31
 
