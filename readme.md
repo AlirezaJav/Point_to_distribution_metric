@@ -69,6 +69,6 @@
 
 <b> Reference </b>
 
-   If you are using this metric, please cite the following publication:
+   If you are using this metric, please cite the following <a href="https://ieeexplore.ieee.org/document/9143408?title=Main_Page">publication</a>:
    
    A. Javaheri, C. Brites, F. Pereira, J. Ascenso, “Mahalanobis based point to distribution metric for point cloud geometry quality evaluation,” IEEE Signal Processing Letters,    pp.1, July, 2020. DOI: 10.1109/LSP.2020.3010128.
