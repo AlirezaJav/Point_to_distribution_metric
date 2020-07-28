@@ -8,6 +8,7 @@
  *
  *  Contributors:
  *    Dong Tian <tian@merl.com>
+ *    Alireza Javaheri <alireza.javaheri@lx.it.pt>   -> Point-to-Distribution Metric is added
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
