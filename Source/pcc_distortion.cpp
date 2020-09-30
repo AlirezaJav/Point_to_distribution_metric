@@ -1179,11 +1179,11 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     qual_metric.c2c_hausdorff_psnr = min( metricA.c2c_hausdorff_psnr, metricB.c2c_hausdorff_psnr );
     qual_metric.c2p_hausdorff_psnr = min( metricA.c2p_hausdorff_psnr, metricB.c2p_hausdorff_psnr );
 
-	//point-to-distribution
-	qual_metric.mmd = max(metricA.mmd, metricB.mmd);
-	qual_metric.msmd = max(metricA.mmd, metricB.mmd);
-	qual_metric.mmd_psnr = min(metricA.mmd_psnr, metricB.mmd_psnr);
-	qual_metric.msmd_psnr = min(metricA.msmd_psnr, metricB.msmd_psnr);
+    //point-to-distribution
+    qual_metric.mmd = max(metricA.mmd, metricB.mmd);
+    qual_metric.msmd = max(metricA.msmd, metricB.msmd);
+    qual_metric.mmd_psnr = min(metricA.mmd_psnr, metricB.mmd_psnr);
+    qual_metric.msmd_psnr = min(metricA.msmd_psnr, metricB.msmd_psnr);
 
     if ( cPar.bColor )
     {
@@ -1216,8 +1216,8 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     cout << "   mseF,PSNR (p2point): " << qual_metric.c2c_psnr << endl;
 	cout << "   mmd       (p2distr): " << qual_metric.mmd << endl;
 	cout << "   mmd,PSNR  (p2distr): " << qual_metric.mmd_psnr << endl;
-	cout << "   msmd      (p2distr): " << qual_metric.mmd << endl;
-	cout << "   msmd,PSNR (p2distr): " << qual_metric.mmd_psnr << endl;
+	cout << "   msmd      (p2distr): " << qual_metric.msmd << endl;
+	cout << "   msmd,PSNR (p2distr): " << qual_metric.msmd_psnr << endl;
 	
     if (!cPar.c2c_only)
     {
