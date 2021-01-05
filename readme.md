@@ -54,7 +54,7 @@
    --resolution=1023
    ```
    
-   * Note that distSize has a default value of 31
+   * Note that distSize has a default value of 31. (Values more than 100 are not allowed.)
    
    if you are also interested in MPEG metric D1 and D2 use the following example:
    ```console
