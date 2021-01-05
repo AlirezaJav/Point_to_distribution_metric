@@ -48,7 +48,7 @@
 #include <sstream>
 #include <limits.h>
 
-#include <Eigen\Dense>
+#include <Eigen/Dense>    //<Eigen\Dense> is not recognized in Unix and Mac OS
 #include <math.h> 
 #include <numeric>
 
