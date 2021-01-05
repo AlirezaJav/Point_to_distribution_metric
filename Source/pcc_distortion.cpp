@@ -546,6 +546,7 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 
   // point to distribution
   my_kd_tree_t mat_indexB_P2D(3, cloudB.xyz.p, 10); // dim, cloud, max leaf
+  const size_t max_results_p2d = 100;
 
 #if DUPLICATECOLORS_DEBUG
   long NbNeighborsDst[num_results_max] = {};
@@ -573,8 +574,8 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 	Eigen::Matrix3d covMat;
 	vector<double> refPoint(3);
 	vector<double> tarPoint(3);
-	std::array<index_type, num_results_max> indices_p2d;
-	std::array<distance_type, num_results_max> sqrDist_p2d;
+	std::array<index_type, max_results_p2d> indices_p2d;
+	std::array<distance_type, max_results_p2d> sqrDist_p2d;
 
 	if (!mat_indexB_P2D.query(&cloudA.xyz.p[i][0], cPar.mhdKNN, &indices_p2d[0], &sqrDist_p2d[0]))
 	{
