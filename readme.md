@@ -4,23 +4,113 @@
 <p> Below table shows the objective-Subjective correlation performance of this metric, compared with most famous state-of-the-art metrics using the MOS scores provied in <a href="https://www.epfl.ch/labs/mmspg/downloads/quality-assessment-for-point-cloud-compression">M-PCCD</a> dataset. </p>
 <table style="width:50%" align="center">
   <tr>
+    <th>Type</th>
     <th>Metric</th>
     <th>SROCC</th> 
     <th>PLCC</th>
     <th>RMSE</th>
   </tr>
   <tr>
+    <td>Point-to-Point</td>
     <td>D1-PSNR</td>
-    <td>Smith</td>
-    <td>50</td>
+    <td>79.1</td>
+    <td>77.7</td>
+    <td>0.857</td>
   </tr>
   <tr>
-    <td>GH 98% PSNR </td>
-    <td>Jackson</td>
-    <td>94</td>
+    <td>Point-to-Point</td>
+    <td>GH 98% PSNR</td>
+    <td>86.9</td>
+    <td>84.6</td>
+    <td>0.726</td>
   </tr>
   <tr>
-    <td>RA-PSNR (APD10)</td>
+    <td>Point-to-Point</td>
+    <td>RA-PSNR (APD<sub>10</sub>)</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to-Point</td>
+    <td>Y-PSNR</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to-Plane</td>
+    <td>D2-PSNR</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to-Plane</td>
+    <td>GH 98% PSNR</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to-Plane</td>
+    <td>RA-PSNR (APD<sub>10</sub>)</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td>PointSSIM</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td>d<sub>gc</sub></td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td>(H<sup>Y</sup>)<sub>L2</sub></td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td>PCM<sub>RR</sub>(MCCV)</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>P2D-G</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>LogP2D-G</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>P2D-Y</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>LogP2D-Y</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>P2D-JGY</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>LogP2D-JGY</td>
     <td>Doe</td>
     <td>80</td>
   </tr>
