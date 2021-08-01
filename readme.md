@@ -27,38 +27,44 @@
   <tr>
     <td>Point-to-Point</td>
     <td>RA-PSNR (APD<sub>10</sub>)</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>90.2</td>
+    <td>88.8</td>
+    <td>0.626</td>
   </tr>
   <tr>
     <td>Point-to-Point</td>
     <td>Y-PSNR</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>66.2</td>
+    <td>67.1</td>
+    <td>1.009</td>
   </tr>
   <tr>
     <td>Point-to-Plane</td>
     <td>D2-PSNR</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>83.8</td>
+    <td>80.5</td>
+    <td>0.808</td>
   </tr>
   <tr>
     <td>Point-to-Plane</td>
     <td>GH 98% PSNR</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>87.9</td>
+    <td>84.3</td>
+    <td>0.731</td>
   </tr>
   <tr>
     <td>Point-to-Plane</td>
     <td>RA-PSNR (APD<sub>10</sub>)</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>89.9</td>
+    <td>88.9</td>
+    <td>0.622</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
     <td>PointSSIM</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>91.8</td>
+    <td>92.6</td>
+    <td>0.514</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
