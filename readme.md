@@ -1,5 +1,185 @@
-# Point to Distribution Metric
-
+# Point-to-Distribution Point Cloud Quality Metric
+<b>Introduction</b>
+<p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
+<p> The software reports a distance metric and a logarithmic distance metric for geometry, color and joint metric as follows:
+<table style="width:50%">
+  <tr>
+    <th>Metric Name</th>
+    <th>Software Output Name</th>
+  </tr>
+  <tr>
+    <td>P2D-G</td>
+    <td>mmd</td>
+  </tr>
+  <tr>
+    <td>LogP2D-G</td>
+    <td>mmd, LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-Y</td>
+    <td>mmdColor[0]</td>
+  </tr>
+  <tr>
+    <td>LogP2D-Y</td>
+    <td>mmdColor[0], LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-Cb</td>
+    <td>mmdColor[1]</td>
+  </tr>
+  <tr>
+    <td>LogP2D-Cb</td>
+    <td>mmdColor[1], LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-Cr</td>
+    <td>mmdColor[2]</td>
+  </tr>
+  <tr>
+    <td>LogP2D-Cr</td>
+    <td>mmdColor[2], LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-JGY</td>
+    <td>mmdJoint</td>
+  </tr>
+  <tr>
+    <td>LogP2D-JGY</td>
+    <td>mmdJoint, LOG</td>
+  </tr>
+</table>
+</p>
+<p> Below table shows the objective-Subjective correlation performance of this metric, compared with most famous state-of-the-art metrics using the MOS scores provied in <a href="https://www.epfl.ch/labs/mmspg/downloads/quality-assessment-for-point-cloud-compression">M-PCCD</a> dataset. </p>
+<table style="width:50%" align="center">
+  <tr>
+    <th>Type</th>
+    <th>Metric</th>
+    <th>SROCC</th> 
+    <th>PLCC</th>
+    <th>RMSE</th>
+  </tr>
+  <tr>
+    <td>Point-to-Point</td>
+    <td>D1-PSNR</td>
+    <td>79.1</td>
+    <td>77.7</td>
+    <td>0.857</td>
+  </tr>
+  <tr>
+    <td>Point-to-Point</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123087/">GH 98% PSNR</a></td>
+    <td>86.9</td>
+    <td>84.6</td>
+    <td>0.726</td>
+  </tr>
+  <tr>
+    <td>Point-to-Point</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9191233">RA-PSNR (APD<sub>10</sub>)</a></td>
+    <td>90.2</td>
+    <td>88.8</td>
+    <td>0.626</td>
+  </tr>
+  <tr>
+    <td>Point-to-Point</td>
+    <td>Y-PSNR</td>
+    <td>66.2</td>
+    <td>67.1</td>
+    <td>1.009</td>
+  </tr>
+  <tr>
+    <td>Point-to-Plane</td>
+    <td>D2-PSNR</td>
+    <td>83.8</td>
+    <td>80.5</td>
+    <td>0.808</td>
+  </tr>
+  <tr>
+    <td>Point-to-Plane</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123087/">GH 98% PSNR</a></td>
+    <td>87.9</td>
+    <td>84.3</td>
+    <td>0.731</td>
+  </tr>
+  <tr>
+    <td>Point-to-Plane</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9191233">RA-PSNR (APD<sub>10</sub>)</a></td>
+    <td>89.9</td>
+    <td>88.9</td>
+    <td>0.622</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9106005">PointSSIM</a></td>
+    <td>91.8</td>
+    <td>92.6</td>
+    <td>0.514</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123089">d<sub>gc</sub></a></td>
+    <td>92.0</td>
+    <td>90.4</td>
+    <td>0.585</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123089">H<sup>Y</sup><sub>L2</sub></a></td>
+    <td>88.4</td>
+    <td>85.3</td>
+    <td>0.710</td>
+  </tr>
+  <tr>
+    <td>Feature-Based</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9198142">PCM<sub>RR</sub>(MCCV)</a></td>
+    <td>90.7</td>
+    <td>90.2</td>
+    <td>0.573</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>P2D-G</td>
+    <td>89.0</td>
+    <td>87.3</td>
+    <td>0.663</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>LogP2D-G</td>
+    <td>89.0</td>
+    <td>87.3</td>
+    <td>0.664</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>P2D-Y</td>
+    <td>89.3</td>
+    <td>90.5</td>
+    <td>0.578</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>LogP2D-Y</td>
+    <td>89.3</td>
+    <td>90.7</td>
+    <td>0.574</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>P2D-JGY</td>
+    <td><b>93.8</b></td>
+    <td><b>92.9</b></td>
+    <td>0.503</td>
+  </tr>
+  <tr>
+    <td>Point-to_Distribution</td>
+    <td>LogP2D-JGY</td>
+    <td><b>93.8</b></td>
+    <td><b>92.9</b></td>
+    <td><b>0.502</b></td>
+  </tr>
+</table>
+   
+   
 <b>Compiling instructions</b>
 
    Download <a href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> C++ template library. 
@@ -42,7 +222,7 @@
    The metrics takes as input a PLY files: source(A), test(B) and size of the distribution in target PC 
    and compute the point-to-distribution distance between A and B.
 
-   The outputs are writing in the terminal as trace and can be catch in log files. 
+   If PCs don't have color or you are not interested in color (and joint) metric(s), set --color=0 (default). 
 
    Example:
    
@@ -51,12 +231,13 @@
    --fileA=./queen/frame_0010.ply 
    --fileB=./S22C2AIR01_queen_dec_0010.ply 
    --distSize=31
+   --color=1
    --resolution=1023
    ```
    
    * Note that distSize has a default value of 31. (Values more than 100 are not allowed.)
    
-   if you are also interested in MPEG metric D1 and D2 use the following example:
+   if you are also interested to get point-to-plane metric results (MPEG D2), you have to include also PC normals as in the following example:
    ```console
    ./test/pc_error 
    --fileA=./queen/frame_0010.ply 
