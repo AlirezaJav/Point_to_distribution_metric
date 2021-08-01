@@ -1,4 +1,4 @@
-# Point to Distribution Metric
+# Point-to-Distribution Point Cloud Quality Metric
 <b>Introduction</b>
 <p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
 <p> The software reports a distance metric and a logarithmic distance metric for geometry, color and joint metric as follows:
@@ -222,7 +222,7 @@
    The metrics takes as input a PLY files: source(A), test(B) and size of the distribution in target PC 
    and compute the point-to-distribution distance between A and B.
 
-   The outputs are writing in the terminal as trace and can be catch in log files. 
+   If PCs don't have color or you are not interested in color (and joint) metric(s), set --color=0 (default). 
 
    Example:
    
@@ -231,12 +231,13 @@
    --fileA=./queen/frame_0010.ply 
    --fileB=./S22C2AIR01_queen_dec_0010.ply 
    --distSize=31
+   --color=1
    --resolution=1023
    ```
    
    * Note that distSize has a default value of 31. (Values more than 100 are not allowed.)
    
-   if you are also interested in MPEG metric D1 and D2 use the following example:
+   if you are also interested to get point-to-plane metric results (MPEG D2), you have to include also PC normals as in the following example:
    ```console
    ./test/pc_error 
    --fileA=./queen/frame_0010.ply 
