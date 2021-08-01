@@ -1110,6 +1110,8 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
     metric.color_rgb_hausdorff_psnr[1] = getPSNR( metric.color_rgb_hausdorff[1], 255.0 );
     metric.color_rgb_hausdorff_psnr[2] = getPSNR( metric.color_rgb_hausdorff[2], 255.0 );
   }
+  metric.mmd_j = (metric.mmd + metric.mmd_c[0]) / 2;
+  metric.log_mmd_j = 10 * log10(1 + (1 / metric.mmd_j));
 
   if (cPar.bLidar)
   {
@@ -1176,6 +1178,8 @@ qMetric::qMetric()
   //msmd_c[0] = msmd_c[1] = msmd_c[2] = 0;
   log_mmd_c[0] = log_mmd_c[1] = log_mmd_c[2] = 0;
   //msmd_c_psnr[0] = msmd_c_psnr[1] = msmd_c_psnr[2] = 0;
+  mmd_j = 0.0;
+  log_mmd_j = 0;
 	
   c2c_mse = 0; c2c_hausdorff = 0;
   c2p_mse = 0; c2p_hausdorff = 0;
@@ -1273,66 +1277,68 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
   metricA.pPSNR = pPSNR;
   findMetric( cloudA, cloudB, cPar, cloudNormalsB, metricA );
 
-  cout << "   mse1      (p2point): " << metricA.c2c_mse << endl;
-  cout << "   mse1,PSNR (p2point): " << metricA.c2c_psnr << endl;
-  cout << "   mmd       (p2distr): " << metricA.mmd << endl;
-  cout << "   mmd,LOG   (p2distr): " << metricA.log_mmd << endl;
+  cout << "   mse1              (p2point): " << metricA.c2c_mse << endl;
+  cout << "   mse1,PSNR         (p2point): " << metricA.c2c_psnr << endl;
+  cout << "   mmdGeometry1      (p2distr): " << metricA.mmd << endl;
+  cout << "   mmdGeometry1,LOG  (p2distr): " << metricA.log_mmd << endl;
   //cout << "   msmd      (p2distr): " << metricA.msmd << endl;
   //cout << "   msmd,PSNR (p2distr): " << metricA.msmd_psnr << endl;
   
   if (!cPar.c2c_only)
   {
-    cout << "   mse1      (p2plane): " << metricA.c2p_mse << endl;
-    cout << "   mse1,PSNR (p2plane): " << metricA.c2p_psnr << endl;
+    cout << "   mse1              (p2plane): " << metricA.c2p_mse << endl;
+    cout << "   mse1,PSNR         (p2plane): " << metricA.c2p_psnr << endl;
   }
   if ( cPar.hausdorff )
   {
-    cout << "   h.       1(p2point): " << metricA.c2c_hausdorff << endl;
-    cout << "   h.,PSNR  1(p2point): " << metricA.c2c_hausdorff_psnr << endl;
+    cout << "   h.       1        (p2point): " << metricA.c2c_hausdorff << endl;
+    cout << "   h.,PSNR  1        (p2point): " << metricA.c2c_hausdorff_psnr << endl;
     if (!cPar.c2c_only)
     {
-      cout << "   h.       1(p2plane): " << metricA.c2p_hausdorff << endl;
-      cout << "   h.,PSNR  1(p2plane): " << metricA.c2p_hausdorff_psnr << endl;
+      cout << "   h.       1      (p2plane): " << metricA.c2p_hausdorff << endl;
+      cout << "   h.,PSNR  1      (p2plane): " << metricA.c2p_hausdorff_psnr << endl;
     }
   }
   if ( cPar.bColor )
   {
-    cout << "   c[0],         1       : " << metricA.color_mse[0] << endl;
-    cout << "   c[1],         1       : " << metricA.color_mse[1] << endl;
-    cout << "   c[2],         1       : " << metricA.color_mse[2] << endl;
-    cout << "   c[0],     PSNR1       : " << metricA.color_psnr[0] << endl;
-    cout << "   c[1],     PSNR1       : " << metricA.color_psnr[1] << endl;
-    cout << "   c[2],     PSNR1       : " << metricA.color_psnr[2] << endl;
-	cout << "   mmdColor[0],  1       : " << metricA.mmd_c[0] << endl;
-	cout << "   mmdColor[1],  1       : " << metricA.mmd_c[1] << endl;
-	cout << "   mmdColor[2],  1       : " << metricA.mmd_c[2] << endl;
+    cout << "   c[0],1                     : " << metricA.color_mse[0] << endl;
+    cout << "   c[1],1                     : " << metricA.color_mse[1] << endl;
+    cout << "   c[2],1                     : " << metricA.color_mse[2] << endl;
+    cout << "   c[0],PSNR1                 : " << metricA.color_psnr[0] << endl;
+    cout << "   c[1],PSNR1                 : " << metricA.color_psnr[1] << endl;
+    cout << "   c[2],PSNR1                 : " << metricA.color_psnr[2] << endl;
+	cout << "   mmdColor[0],1     (p2distr): " << metricA.mmd_c[0] << endl;
+	cout << "   mmdColor[1],1     (p2distr): " << metricA.mmd_c[1] << endl;
+	cout << "   mmdColor[2],1     (p2distr): " << metricA.mmd_c[2] << endl;
 	//cout << "   msmdColor[0], 1      : " << metricA.msmd_c[0] << endl;
 	//cout << "   msmdColor[1], 1      : " << metricA.msmd_c[1] << endl;
 	//cout << "   msmdColor[2], 1      : " << metricA.msmd_c[2] << endl;
-	cout << "   mmdColor[0], LOG1    : " << metricA.log_mmd_c[0] << endl;
-	cout << "   mmdColor[1], LOG1    : " << metricA.log_mmd_c[1] << endl;
-	cout << "   mmdColor[2], LOG1    : " << metricA.log_mmd_c[2] << endl;
+	cout << "   mmdColor[0],LOG1  (p2distr): " << metricA.log_mmd_c[0] << endl;
+	cout << "   mmdColor[1],LOG1  (p2distr): " << metricA.log_mmd_c[1] << endl;
+	cout << "   mmdColor[2],LOG1  (p2distr): " << metricA.log_mmd_c[2] << endl;
 	//cout << "   msmdColor[0],PSNR1   : " << metricA.msmd_c_psnr[0] << endl;
 	//cout << "   msmdColor[1],PSNR1   : " << metricA.msmd_c_psnr[1] << endl;
 	//cout << "   msmdColor[2],PSNR1   : " << metricA.msmd_c_psnr[2] << endl;
     if ( cPar.hausdorff )
     {
-      cout << " h.c[0],    1         : " << metricA.color_rgb_hausdorff[0] << endl;
-      cout << " h.c[1],    1         : " << metricA.color_rgb_hausdorff[1] << endl;
-      cout << " h.c[2],    1         : " << metricA.color_rgb_hausdorff[2] << endl;
-      cout << " h.c[0],PSNR1         : " << metricA.color_rgb_hausdorff_psnr[0] << endl;
-      cout << " h.c[1],PSNR1         : " << metricA.color_rgb_hausdorff_psnr[1] << endl;
-      cout << " h.c[2],PSNR1         : " << metricA.color_rgb_hausdorff_psnr[2] << endl;
+      cout << " h.c[0],    1               : " << metricA.color_rgb_hausdorff[0] << endl;
+      cout << " h.c[1],    1               : " << metricA.color_rgb_hausdorff[1] << endl;
+      cout << " h.c[2],    1               : " << metricA.color_rgb_hausdorff[2] << endl;
+      cout << " h.c[0],PSNR1               : " << metricA.color_rgb_hausdorff_psnr[0] << endl;
+      cout << " h.c[1],PSNR1               : " << metricA.color_rgb_hausdorff_psnr[1] << endl;
+      cout << " h.c[2],PSNR1               : " << metricA.color_rgb_hausdorff_psnr[2] << endl;
     }
   }
+  cout << "   mmdJoint1         (p2distr): " << metricA.mmd_j << endl;
+  cout << "   mmdJoint1,LOG     (p2distr): " << metricA.log_mmd_j << endl;
   if ( cPar.bLidar )
   {
-    cout << "   r,       1         : " << metricA.reflectance_mse  << endl;
-    cout << "   r,PSNR   1         : " << metricA.reflectance_psnr << endl;
+    cout << "   r,1                        : " << metricA.reflectance_mse  << endl;
+    cout << "   r,PSNR1                    : " << metricA.reflectance_psnr << endl;
     if ( cPar.hausdorff )
     {
-      cout << " h.r,       1         : " << metricA.reflectance_hausdorff  << endl;
-      cout << " h.r,PSNR   1         : " << metricA.reflectance_hausdorff_psnr << endl;
+      cout << " h.r,1                      : " << metricA.reflectance_hausdorff  << endl;
+      cout << " h.r,PSNR1                  : " << metricA.reflectance_hausdorff_psnr << endl;
     }
   }
 
@@ -1344,61 +1350,63 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     metricB.pPSNR = pPSNR;
     findMetric( cloudB, cloudA, cPar, cloudNormalsA, metricB );
 
-    cout << "   mse2      (p2point): " << metricB.c2c_mse << endl;
-    cout << "   mse2,PSNR (p2point): " << metricB.c2c_psnr << endl;
-	cout << "   mmd       (p2distr): " << metricB.mmd << endl;
-	cout << "   mmd,LOG   (p2distr): " << metricB.log_mmd << endl;
+    cout << "   mse2              (p2point): " << metricB.c2c_mse << endl;
+    cout << "   mse2,PSNR         (p2point): " << metricB.c2c_psnr << endl;
+	cout << "   mmdGeometry2      (p2distr): " << metricB.mmd << endl;
+	cout << "   mmdGeometry2,LOG  (p2distr): " << metricB.log_mmd << endl;
 	//cout << "   msmd      (p2distr): " << metricB.msmd << endl;
 	//cout << "   msmd,PSNR (p2distr): " << metricB.msmd_psnr << endl;
     if (!cPar.c2c_only)
     {
-      cout << "   mse2      (p2plane): " << metricB.c2p_mse << endl;
-      cout << "   mse2,PSNR (p2plane): " << metricB.c2p_psnr << endl;
+      cout << "   mse2              (p2plane): " << metricB.c2p_mse << endl;
+      cout << "   mse2,PSNR         (p2plane): " << metricB.c2p_psnr << endl;
     }
     if ( cPar.hausdorff )
     {
-      cout << "   h.       2(p2point): " << metricB.c2c_hausdorff << endl;
-      cout << "   h.,PSNR  2(p2point): " << metricB.c2c_hausdorff_psnr << endl;
+      cout << "   h.2               (p2point): " << metricB.c2c_hausdorff << endl;
+      cout << "   h.,PSNR2          (p2point): " << metricB.c2c_hausdorff_psnr << endl;
       if (!cPar.c2c_only)
       {
-        cout << "   h.       2(p2plane): " << metricB.c2p_hausdorff << endl;
-        cout << "   h.,PSNR  2(p2plane): " << metricB.c2p_hausdorff_psnr << endl;
+        cout << "   h.2             (p2plane): " << metricB.c2p_hausdorff << endl;
+        cout << "   h.,PSNR2        (p2plane): " << metricB.c2p_hausdorff_psnr << endl;
       }
     }
     if ( cPar.bColor)
     {
-      cout << "   c[0],         2      : " << metricB.color_mse[0] << endl;
-      cout << "   c[1],         2      : " << metricB.color_mse[1] << endl;
-      cout << "   c[2],         2      : " << metricB.color_mse[2] << endl;
-      cout << "   c[0],     PSNR2      : " << metricB.color_psnr[0] << endl;
-      cout << "   c[1],     PSNR2      : " << metricB.color_psnr[1] << endl;
-      cout << "   c[2],     PSNR2      : " << metricB.color_psnr[2] << endl;
-	  cout << "   mmdColor[0],  2      : " << metricB.mmd_c[0] << endl;
-	  cout << "   mmdColor[1],  2      : " << metricB.mmd_c[1] << endl;
-	  cout << "   mmdColor[2],  2      : " << metricB.mmd_c[2] << endl;
+      cout << "   c[0],2                     : " << metricB.color_mse[0] << endl;
+      cout << "   c[1],2                     : " << metricB.color_mse[1] << endl;
+      cout << "   c[2],2                     : " << metricB.color_mse[2] << endl;
+      cout << "   c[0],PSNR2                 : " << metricB.color_psnr[0] << endl;
+      cout << "   c[1],PSNR2                 : " << metricB.color_psnr[1] << endl;
+      cout << "   c[2],PSNR2                 : " << metricB.color_psnr[2] << endl;
+	  cout << "   mmdColor[0],2     (p2distr): " << metricB.mmd_c[0] << endl;
+	  cout << "   mmdColor[1],2     (p2distr): " << metricB.mmd_c[1] << endl;
+	  cout << "   mmdColor[2],2     (p2distr): " << metricB.mmd_c[2] << endl;
 	  //cout << "   msmdColor[0], 2      : " << metricB.msmd_c[0] << endl;
 	  //cout << "   msmdColor[1], 2      : " << metricB.msmd_c[1] << endl;
 	  //cout << "   msmdColor[2], 2      : " << metricB.msmd_c[2] << endl;
-	  cout << "   mmdColor[0], LOG2    : " << metricB.log_mmd_c[0] << endl;
-	  cout << "   mmdColor[1], LOG2    : " << metricB.log_mmd_c[1] << endl;
-	  cout << "   mmdColor[2], LOG2    : " << metricB.log_mmd_c[2] << endl;
+	  cout << "   mmdColor[0],LOG2  (p2distr): " << metricB.log_mmd_c[0] << endl;
+	  cout << "   mmdColor[1],LOG2  (p2distr): " << metricB.log_mmd_c[1] << endl;
+	  cout << "   mmdColor[2],LOG2  (p2distr): " << metricB.log_mmd_c[2] << endl;
 	  //cout << "   msmdColor[0],PSNR2   : " << metricB.msmd_c_psnr[0] << endl;
 	  //cout << "   msmdColor[1],PSNR2   : " << metricB.msmd_c_psnr[1] << endl;
 	  //cout << "   msmdColor[2],PSNR2   : " << metricB.msmd_c_psnr[2] << endl;
       if ( cPar.hausdorff)
       {
-        cout << " h.c[0],    2         : " << metricB.color_rgb_hausdorff[0] << endl;
-        cout << " h.c[1],    2         : " << metricB.color_rgb_hausdorff[1] << endl;
-        cout << " h.c[2],    2         : " << metricB.color_rgb_hausdorff[2] << endl;
-        cout << " h.c[0],PSNR2         : " << metricB.color_rgb_hausdorff_psnr[0] << endl;
-        cout << " h.c[1],PSNR2         : " << metricB.color_rgb_hausdorff_psnr[1] << endl;
-        cout << " h.c[2],PSNR2         : " << metricB.color_rgb_hausdorff_psnr[2] << endl;
+        cout << " h.c[0],2                 : " << metricB.color_rgb_hausdorff[0] << endl;
+        cout << " h.c[1],2                 : " << metricB.color_rgb_hausdorff[1] << endl;
+        cout << " h.c[2],2                 : " << metricB.color_rgb_hausdorff[2] << endl;
+        cout << " h.c[0],PSNR2             : " << metricB.color_rgb_hausdorff_psnr[0] << endl;
+        cout << " h.c[1],PSNR2             : " << metricB.color_rgb_hausdorff_psnr[1] << endl;
+        cout << " h.c[2],PSNR2             : " << metricB.color_rgb_hausdorff_psnr[2] << endl;
       }
     }
+	cout << "   mmdJoint2         (p2distr): " << metricB.mmd_j << endl;
+	cout << "   mmdJoint2,LOG     (p2distr): " << metricB.log_mmd_j << endl;
     if ( cPar.bLidar )
     {
-      cout << "   r,       2         : " << metricB.reflectance_mse  << endl;
-      cout << "   r,PSNR   2         : " << metricB.reflectance_psnr << endl;
+      cout << "   r,2                      : " << metricB.reflectance_mse  << endl;
+      cout << "   r,PSNR2                  : " << metricB.reflectance_psnr << endl;
       if ( cPar.hausdorff )
       {
         cout << " h.r,       2         : " << metricB.reflectance_hausdorff  << endl;
@@ -1455,6 +1463,9 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
 	  //qual_metric.msmd_c_psnr[1] = min(metricA.msmd_c_psnr[1], metricB.msmd_c_psnr[1]);
 	  //qual_metric.msmd_c_psnr[2] = min(metricA.msmd_c_psnr[2], metricB.msmd_c_psnr[2]);
     }
+	qual_metric.mmd_j = max(metricA.mmd_j, metricB.mmd_j);
+	qual_metric.log_mmd_j = min(metricA.log_mmd_j, metricB.log_mmd_j);
+
     if ( cPar.bLidar )
     {
       qual_metric.reflectance_mse  = max( metricA.reflectance_mse,  metricB.reflectance_mse  );
@@ -1464,66 +1475,69 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     }
 
     cout << "3. Final (symmetric).\n";
-    cout << "   mseF      (p2point): " << qual_metric.c2c_mse << endl;
-    cout << "   mseF,PSNR (p2point): " << qual_metric.c2c_psnr << endl;
-	cout << "   mmd       (p2distr): " << qual_metric.mmd << endl;
-	cout << "   mmd,LOG   (p2distr): " << qual_metric.log_mmd << endl;
+    cout << "   mseF              (p2point): " << qual_metric.c2c_mse << endl;
+    cout << "   mseF,PSNR         (p2point): " << qual_metric.c2c_psnr << endl;
+	cout << "   mmdGeometryF      (p2distr): " << qual_metric.mmd << endl;
+	cout << "   mmdGeometryF,LOG  (p2distr): " << qual_metric.log_mmd << endl;
 	//cout << "   msmd      (p2distr): " << qual_metric.msmd << endl;
 	//cout << "   msmd,PSNR (p2distr): " << qual_metric.msmd_psnr << endl;
 	
     if (!cPar.c2c_only)
     {
-      cout << "   mseF      (p2plane): " << qual_metric.c2p_mse << endl;
-      cout << "   mseF,PSNR (p2plane): " << qual_metric.c2p_psnr << endl;
+      cout << "   mseF              (p2plane): " << qual_metric.c2p_mse << endl;
+      cout << "   mseF,PSNR         (p2plane): " << qual_metric.c2p_psnr << endl;
     }
     if ( cPar.hausdorff )
     {
-      cout << "   h.        (p2point): " << qual_metric.c2c_hausdorff << endl;
-      cout << "   h.,PSNR   (p2point): " << qual_metric.c2c_hausdorff_psnr << endl;
+      cout << "   h.                (p2point): " << qual_metric.c2c_hausdorff << endl;
+      cout << "   h.,PSNR           (p2point): " << qual_metric.c2c_hausdorff_psnr << endl;
       if (!cPar.c2c_only)
       {
-        cout << "   h.        (p2plane): " << qual_metric.c2p_hausdorff << endl;
-        cout << "   h.,PSNR   (p2plane): " << qual_metric.c2p_hausdorff_psnr << endl;
+        cout << "   h.              (p2plane): " << qual_metric.c2p_hausdorff << endl;
+        cout << "   h.,PSNR         (p2plane): " << qual_metric.c2p_hausdorff_psnr << endl;
       }
     }
     if ( cPar.bColor )
     {
-      cout << "   c[0],         F      : " << qual_metric.color_mse[0] << endl;
-      cout << "   c[1],         F      : " << qual_metric.color_mse[1] << endl;
-      cout << "   c[2],         F      : " << qual_metric.color_mse[2] << endl;
-      cout << "   c[0],     PSNRF      : " << qual_metric.color_psnr[0] << endl;
-      cout << "   c[1],     PSNRF      : " << qual_metric.color_psnr[1] << endl;
-      cout << "   c[2],     PSNRF      : " << qual_metric.color_psnr[2] << endl;
-	  cout << "   mmdColor[0],  F      : " << qual_metric.mmd_c[0] << endl;
-	  cout << "   mmdColor[1],  F      : " << qual_metric.mmd_c[1] << endl;
-	  cout << "   mmdColor[2],  F      : " << qual_metric.mmd_c[2] << endl;
+      cout << "   c[0],F                     : " << qual_metric.color_mse[0] << endl;
+      cout << "   c[1],F                     : " << qual_metric.color_mse[1] << endl;
+      cout << "   c[2],F                     : " << qual_metric.color_mse[2] << endl;
+      cout << "   c[0],PSNRF                 : " << qual_metric.color_psnr[0] << endl;
+      cout << "   c[1],PSNRF                 : " << qual_metric.color_psnr[1] << endl;
+      cout << "   c[2],PSNRF                 : " << qual_metric.color_psnr[2] << endl;
+	  cout << "   mmdColor[0],F     (p2distr): " << qual_metric.mmd_c[0] << endl;
+	  cout << "   mmdColor[1],F     (p2distr): " << qual_metric.mmd_c[1] << endl;
+	  cout << "   mmdColor[2],F     (p2distr): " << qual_metric.mmd_c[2] << endl;
 	  //cout << "   msmdColor[0],    F      : " << qual_metric.msmd_c[0] << endl;
 	  //cout << "   msmdColor[1],    F      : " << qual_metric.msmd_c[1] << endl;
 	  //cout << "   msmdColor[2],    F      : " << qual_metric.msmd_c[2] << endl;
-	  cout << "   mmdColor[0], LOGF    : " << qual_metric.log_mmd_c[0] << endl;
-	  cout << "   mmdColor[1], LOGF    : " << qual_metric.log_mmd_c[1] << endl;
-	  cout << "   mmdColor[2], LOGF    : " << qual_metric.log_mmd_c[2] << endl;
+	  cout << "   mmdColor[0],LOGF  (p2distr): " << qual_metric.log_mmd_c[0] << endl;
+	  cout << "   mmdColor[1],LOGF  (p2distr): " << qual_metric.log_mmd_c[1] << endl;
+	  cout << "   mmdColor[2],LOGF  (p2distr): " << qual_metric.log_mmd_c[2] << endl;
 	  //cout << "   msmdColor[0],PSNRF      : " << qual_metric.msmd_c_psnr[0] << endl;
 	  //cout << "   msmdColor[1],PSNRF      : " << qual_metric.msmd_c_psnr[1] << endl;
 	  //cout << "   msmdColor[2],PSNRF      : " << qual_metric.msmd_c_psnr[2] << endl;
       if ( cPar.hausdorff )
       {
-        cout << " h.c[0],    F         : " << qual_metric.color_rgb_hausdorff[0] << endl;
-        cout << " h.c[1],    F         : " << qual_metric.color_rgb_hausdorff[1] << endl;
-        cout << " h.c[2],    F         : " << qual_metric.color_rgb_hausdorff[2] << endl;
-        cout << " h.c[0],PSNRF         : " << qual_metric.color_rgb_hausdorff_psnr[0] << endl;
-        cout << " h.c[1],PSNRF         : " << qual_metric.color_rgb_hausdorff_psnr[1] << endl;
-        cout << " h.c[2],PSNRF         : " << qual_metric.color_rgb_hausdorff_psnr[2] << endl;
+        cout << " h.c[0],    F               : " << qual_metric.color_rgb_hausdorff[0] << endl;
+        cout << " h.c[1],    F               : " << qual_metric.color_rgb_hausdorff[1] << endl;
+        cout << " h.c[2],    F               : " << qual_metric.color_rgb_hausdorff[2] << endl;
+        cout << " h.c[0],PSNRF               : " << qual_metric.color_rgb_hausdorff_psnr[0] << endl;
+        cout << " h.c[1],PSNRF               : " << qual_metric.color_rgb_hausdorff_psnr[1] << endl;
+        cout << " h.c[2],PSNRF               : " << qual_metric.color_rgb_hausdorff_psnr[2] << endl;
       }
     }
+	cout << "   mmdJointF         (p2distr): " << qual_metric.mmd_j << endl;
+	cout << "   mmdJointF,LOG     (p2distr): " << qual_metric.log_mmd_j << endl;
+
     if ( cPar.bLidar )
     {
-      cout << "   r,       F         : " << qual_metric.reflectance_mse  << endl;
-      cout << "   r,PSNR   F         : " << qual_metric.reflectance_psnr << endl;
+      cout << "   r,       F                 : " << qual_metric.reflectance_mse  << endl;
+      cout << "   r,PSNR   F                 : " << qual_metric.reflectance_psnr << endl;
       if ( cPar.hausdorff )
       {
-        cout << " h.r,       F         : " << qual_metric.reflectance_hausdorff  << endl;
-        cout << " h.r,PSNR   F         : " << qual_metric.reflectance_hausdorff_psnr << endl;
+        cout << " h.r,       F               : " << qual_metric.reflectance_hausdorff  << endl;
+        cout << " h.r,PSNR   F               : " << qual_metric.reflectance_hausdorff_psnr << endl;
       }
     }
   }

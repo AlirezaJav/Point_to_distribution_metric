@@ -133,6 +133,9 @@ namespace pcc_quality {
 	//double msmd_c[3];
 	float log_mmd_c[3];
 	//float msmd_c_psnr[3];
+	double mmd_j;
+	float log_mmd_j;
+
     // reflectance
     float reflectance_mse;
     float reflectance_psnr;
