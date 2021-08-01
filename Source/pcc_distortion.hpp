@@ -124,12 +124,15 @@ namespace pcc_quality {
     // point 2 plane ( cloud 2 plane ),  benchmark metric 
     float pPSNR; //! Peak value for PSNR computation. Intrinsic resolution
 
-	// point to distribution, proposed metric
+	// point to distribution metric
 	double mmd;
-	double msmd;
-	float mmd_psnr;
-	float msmd_psnr;
-	
+	//double msmd;
+	float log_mmd;
+	//float msmd_psnr;
+	double mmd_c[3];
+	//double msmd_c[3];
+	float log_mmd_c[3];
+	//float msmd_c_psnr[3];
     // reflectance
     float reflectance_mse;
     float reflectance_psnr;

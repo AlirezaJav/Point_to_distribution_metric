@@ -48,7 +48,7 @@
 #include <sstream>
 #include <limits.h>
 
-#include <Eigen/Dense>    //<Eigen\Dense> is not recognized in Unix and Mac OS
+#include <Eigen\Dense>
 #include <math.h> 
 #include <numeric>
 
@@ -92,6 +92,44 @@ typedef KDTreeVectorOfVectorsAdaptor<
  ***********************************************
  */
 
+
+ /**
+ \brief helper function to convert RGB to YUV (BT.709 or YCoCg-R)
+ */
+void convertRGBtoYUV(int type, const std::array<unsigned char, 3> &in_rgb,
+	float *out_yuv) {
+	// color space conversion to YUV
+
+	if (type == 0)
+	{
+		for (int d = 0; d < 3; d++)
+			out_yuv[d] = float(in_rgb[d]);
+	}
+	else if (type == 8)
+	{
+		int g = in_rgb[1];
+		int b = in_rgb[2];
+		int r = in_rgb[0];
+
+		int co = r - b;
+		int t = b + (co >> 1);
+		int cg = g - t;
+		int y = t + (cg >> 1);
+
+		int offset = 1 << 8;
+
+		out_yuv[0] = y;
+		out_yuv[1] = co + offset;
+		out_yuv[2] = cg + offset;
+	}
+	else // type 1
+	{
+		out_yuv[0] = float((0.2126 * in_rgb[0] + 0.7152 * in_rgb[1] + 0.0722 * in_rgb[2]) / 255.0);
+		out_yuv[1] = float((-0.1146 * in_rgb[0] - 0.3854 * in_rgb[1] + 0.5000 * in_rgb[2]) / 255.0 + 0.5000);
+		out_yuv[2] = float((0.5000 * in_rgb[0] - 0.4542 * in_rgb[1] - 0.0458 * in_rgb[2]) / 255.0 + 0.5000);
+	}
+}
+
  /**!
  * \function
  *   Compute the outer product of two vectors
@@ -109,7 +147,25 @@ void outer_product(vector<double> vec1, vector<double> vec2, vector<vector<doubl
 		}
 	}
 }
- 
+
+/**!
+* \function
+*   Compute the outer product of two vectors
+* \parameters
+*   @param vect1: first vector
+*   @param vect1: second vector
+*   @param mat: output matrix
+* \author
+*   Alireza Javaheri, IT (alireza.javaheri@lx.it.pt)
+*/
+void outer_product(vector<float> vec1, vector<float> vec2, vector<vector<float>>& mat) {
+	for (int i = 0; i < vec1.size(); i++) {
+		for (int j = 0; j < vec2.size(); j++) {
+			mat[i][j] = vec1[i] * vec2[j];
+		}
+	}
+}
+
  /**!
  * \function
  *   Compute the mean of a point set, later used
@@ -138,7 +194,38 @@ vector<double> findMean(PccPointCloud &cloud, index_type *indices, int populatio
 	mean[2] = sumZ / population;
 	return mean;
 }
- 
+
+/**!
+* \function
+*   Compute the mean of colors in a point set, later used
+to find the distance
+* \parameters
+*   @param cloud: point cloud
+*   @param indices: indices of point set in point cloud
+*   @param population: size of point set
+* \author
+*   Alireza Javaheri, IT (alireza.javaheri@lx.it.pt)
+*/
+vector<float> findMean_c(PccPointCloud &cloud, int ColorMode, index_type *indices, int population)
+{
+	vector<float> mean(3);
+	float out[3];
+	double sum0 = 0;
+	double sum1 = 0;
+	double sum2 = 0;
+	for (unsigned i = 0; i < population; i++)
+	{
+		convertRGBtoYUV(ColorMode, cloud.rgb.c[indices[i]], out);
+		sum0 += out[0];
+		sum1 += out[1];
+		sum2 += out[2];
+	}
+	mean[0] = sum0 / population;
+	mean[1] = sum1 / population;
+	mean[2] = sum2 / population;
+	return mean;
+}
+
 /**!
 * \function
 *   Compute the covariance matrix of a point set, later used
@@ -156,7 +243,6 @@ Eigen::Matrix3d findCovMat(PccPointCloud &cloud, index_type *indices, int popula
 	vector<double> normD(3);
 	vector<vector<double>> C_iter(3,vector<double>(3));
 	vector<vector<double>> C_sum = { { 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
-	//vector<vector<double>> C_final;
 	Eigen::MatrixXd C_final(3, 3);
 
 	for (int i = 0; i < population; i++)
@@ -177,7 +263,52 @@ Eigen::Matrix3d findCovMat(PccPointCloud &cloud, index_type *indices, int popula
 	{
 		for (int k = 0; k < normD.size(); k++)
 		{
-			//C_final[j][k] = C_sum[j][k] / population;
+			C_final(j, k) = C_sum[j][k] / population;
+		}
+	}
+
+	return C_final;
+}
+
+/**!
+* \function
+*   Compute the covariance matrix of color in a point set, later used
+to find the distance
+* \parameters
+*   @param cloud: point cloud
+*   @param indices: indices of point set in point cloud
+*   @param population: size of point set
+*   @param cMean: color mean of the population
+* \author
+*   Alireza Javaheri, IT (alireza.javaheri@lx.it.pt)
+*/
+Eigen::Matrix3d findCovMat_c(PccPointCloud &cloud, int ColorMode, index_type *indices, int population, vector<float> cMean)
+{
+	float out[3];
+	vector<double> normD(3);
+	vector<vector<double>> C_iter(3, vector<double>(3));
+	vector<vector<double>> C_sum = { { 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
+	Eigen::MatrixXd C_final(3, 3);
+
+	for (int i = 0; i < population; i++)
+	{
+		convertRGBtoYUV(ColorMode, cloud.rgb.c[indices[i]], out);
+		normD[0] = out[0] - cMean[0];
+		normD[1] = out[1] - cMean[1];
+		normD[2] = out[2] - cMean[2];
+		outer_product(normD, normD, C_iter);
+		for (int j = 0; j < normD.size(); j++)
+		{
+			for (int k = 0; k < normD.size(); k++)
+			{
+				C_sum[j][k] = C_sum[j][k] + C_iter[j][k];
+			}
+		}
+	}
+	for (int j = 0; j < normD.size(); j++)
+	{
+		for (int k = 0; k < normD.size(); k++)
+		{
 			C_final(j, k) = C_sum[j][k] / population;
 		}
 	}
@@ -199,6 +330,7 @@ to find the distance
 double mahalanobisDist(vector<double> refPoint, vector<double> mean, Eigen::Matrix3d cov)
 {
 	double MD;
+	double CN;
 	Eigen::Matrix3d invCov;
 	//Eigen::Matrix3d invCovD;
 	Eigen::Vector3d ref;
@@ -213,10 +345,12 @@ double mahalanobisDist(vector<double> refPoint, vector<double> mean, Eigen::Matr
 		if floating point data is used, threshold should be defined on condition number of covariance matrix
 		Threshold on condition number of covariance matrix is not tested!
 	*/
+	//Eigen::JacobiSVD<Eigen::Matrix3d> svd(cov);
 	if (cov.determinant() < 0.000001 || lltOfA.info() == Eigen::NumericalIssue)   
 	{                                                                             
 		return NAN;
 	}
+
 	else
 	{
 		invCov = cov.inverse();
@@ -231,7 +365,54 @@ double mahalanobisDist(vector<double> refPoint, vector<double> mean, Eigen::Matr
 
 	return MD;
 }
- 
+
+/**!
+* \function
+*   Compute the covariance matrix of a point set, later used
+to find the distance
+* \parameters
+*   @param refPoint: reference point in PC A
+*   @param mean: mean of the nearest neighbor population
+*   @param cov: covariance matrix of the nearest neighbor population
+* \author
+*   Alireza Javaheri, IT (alireza.javaheri@lx.it.pt)
+*/
+double mahalanobisDist_c(float refPoint, float mean, float var, int ColorMode, int comp)
+{
+	static double MD;
+	float ref;
+
+	ref = refPoint - mean;
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (var == 0)
+		{
+			if (ref == 0)
+				MD = 0;
+			else
+			{
+				if (ColorMode == 0)
+					MD = 255;
+				else if (ColorMode == 1)
+					MD = 1;
+				else
+				{
+					if (comp ==0)
+						MD = 255;
+					else
+						MD = 511;
+				}
+			}
+		}
+		else
+		{
+			MD = sqrt((ref * ref) / var);
+		}
+	}
+	return MD;
+}
+
 /**!
  * \function
  *   Compute the minimum and maximum NN distances, find out the
@@ -438,43 +619,6 @@ scaleNormals(PccPointCloud &cloudNormalsA, PccPointCloud &cloudB, PccPointCloud 
 #endif
 }
 
-/**
-   \brief helper function to convert RGB to YUV (BT.709 or YCoCg-R)
- */
-void convertRGBtoYUV(int type, const std::array<unsigned char, 3> &in_rgb,
-                           float *out_yuv) {
-  // color space conversion to YUV
-
-  if (type == 0)
-  {
-    for (int d = 0; d < 3; d++)
-      out_yuv[d] = float(in_rgb[d]);
-  }
-  else if (type == 8)
-  {
-    int g = in_rgb[1];
-    int b = in_rgb[2];
-    int r = in_rgb[0];
-
-    int co = r - b;
-    int t = b + (co >> 1);
-    int cg = g - t;
-    int y = t + (cg >> 1);
-
-    int offset = 1 << 8;
-
-    out_yuv[0] = y;
-    out_yuv[1] = co + offset;
-    out_yuv[2] = cg + offset;
-  }
-  else // type 1
-  {
-    out_yuv[0] = float((0.2126 * in_rgb[0] + 0.7152 * in_rgb[1] + 0.0722 * in_rgb[2]) / 255.0);
-    out_yuv[1] = float((-0.1146 * in_rgb[0] - 0.3854 * in_rgb[1] + 0.5000 * in_rgb[2]) / 255.0 + 0.5000);
-    out_yuv[2] = float((0.5000 * in_rgb[0] - 0.4542 * in_rgb[1] - 0.0458 * in_rgb[2]) / 255.0 + 0.5000);
-  }
-}
-
 /**!
  * \function
  *   To compute "one-way" quality metric: Point-to-Point, Point-to-Plane
@@ -514,17 +658,28 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 
   //Point-to-Distribution Variables
   int illCounter = 0;
+  int illCounter_c = 0;
   long double SumMahDist = 0;
-  long double SumSMahDist = 0;
+  //long double SumSMahDist = 0;
+  double SumMahColor[3] = { 0 };
+  //double SumSMahColor[3] = { 0 };
   double MinMahDist = std::numeric_limits<double>::max();
   double MaxMahDist = std::numeric_limits<double>::min();
-  double MinSMahDist = std::numeric_limits<double>::max();
-  double MaxSMahDist = std::numeric_limits<double>::min();
+  //double MinSMahDist = std::numeric_limits<double>::max();
+  //double MaxSMahDist = std::numeric_limits<double>::min();
+  double MinMahColor = std::numeric_limits<double>::max();
+  double MaxMahColor = std::numeric_limits<double>::min();
+  //double MinSMahColor = std::numeric_limits<double>::max();
+  //double MaxSMahColor = std::numeric_limits<double>::min();
   double min_dist_b_c2c = std::numeric_limits<double>::max();
   vector<double> AllLostMahErrorVectors(cloudA.size);
   vector<double> AllCorrDistErrorVectors(cloudA.size);
-  vector<double> AllLostSMahErrorVectors(cloudA.size);
-  vector<double> AllCorrSDistErrorVectors(cloudA.size);
+  //vector<double> AllLostSMahErrorVectors(cloudA.size);
+  //vector<double> AllCorrSDistErrorVectors(cloudA.size);
+  vector<double> AllLostColorMahErrorVectors(cloudA.size);
+  vector<double> AllCorrColorErrorVectors(cloudA.size);
+  //vector<double> AllLostSColorMahErrorVectors(cloudA.size);
+  //vector<double> AllCorrSColorErrorVectors(cloudA.size);
 
   double max_dist_b_c2c = std::numeric_limits<double>::min();
   double sse_dist_b_c2c = 0;
@@ -546,6 +701,7 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 
   // point to distribution
   my_kd_tree_t mat_indexB_P2D(3, cloudB.xyz.p, 10); // dim, cloud, max leaf
+  my_kd_tree_t mat_indexA_P2D(3, cloudA.xyz.p, 10); // dim, cloud, max leaf
   const size_t max_results_p2d = 100;
 
 #if DUPLICATECOLORS_DEBUG
@@ -569,7 +725,7 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 
 	//Point to Distribution Distance computation goes here!
 	long double md = 0;
-	long double smd = 0;
+	//long double smd = 0;
 	vector<double> mean(3);
 	Eigen::Matrix3d covMat;
 	vector<double> refPoint(3);
@@ -589,7 +745,7 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 	refPoint[2] = cloudA.xyz.p[i][2];
 	
 	md = mahalanobisDist(refPoint, mean, covMat);
-	
+
     int j = indices[0];
     if (j < 0)
       continue;
@@ -648,6 +804,13 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
         }
       }
     }
+
+	//P2D Variables for color
+	vector<float> meanColor(3);
+	Eigen::Matrix3d covMatColor;
+	vector<float> refPointColor(3);
+	double md_c[3];
+	//double smd_c[3];
 
     double distColor[3];
     distColor[0] = distColor[1] = distColor[2] = 0.0;
@@ -730,10 +893,21 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
         distColorRGB[1] = (cloudA.rgb.c[i][1] - cloudB.rgb.c[j][1]) * (cloudA.rgb.c[i][1] - cloudB.rgb.c[j][1]);
         distColorRGB[2] = (cloudA.rgb.c[i][2] - cloudB.rgb.c[j][2]) * (cloudA.rgb.c[i][2] - cloudB.rgb.c[j][2]);
       }
-
+	  	  
       distColor[0] = (in[0] - out[0]) * (in[0] - out[0]);
       distColor[1] = (in[1] - out[1]) * (in[1] - out[1]);
       distColor[2] = (in[2] - out[2]) * (in[2] - out[2]);
+
+	  //Point-to-Distribution Metric (Color)
+	  //Neighbors with same geometric distance are not a concern for P2D
+	  meanColor = findMean_c(cloudB, cPar.mseSpace, &indices_p2d[0], cPar.mhdKNN);
+	  covMatColor = findCovMat_c(cloudB, cPar.mseSpace, &indices_p2d[0], cPar.mhdKNN, meanColor);
+	  refPointColor[0] = in[0];
+	  refPointColor[1] = in[1];
+	  refPointColor[2] = in[2];
+	  md_c[0] = mahalanobisDist_c(refPointColor[0], meanColor[0], covMatColor(0, 0), cPar.mseSpace,0);
+	  md_c[1] = mahalanobisDist_c(refPointColor[1], meanColor[1], covMatColor(1, 1), cPar.mseSpace, 1);
+	  md_c[2] = mahalanobisDist_c(refPointColor[2], meanColor[2], covMatColor(2, 2), cPar.mseSpace, 2);
     }
 
     double distReflectance;
@@ -774,15 +948,15 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 		AllLostMahErrorVectors[i] = md;
 		AllCorrDistErrorVectors[i] = -1;
 
-		smd = md * md;	// the square mahalanobis distance
-		if (smd > MaxSMahDist)
-			MaxSMahDist = smd;
-		if (smd < MinSMahDist)
-			MinSMahDist = smd;
-		SumSMahDist += smd;
+		//smd = md * md;	// the square mahalanobis distance
+		//if (smd > MaxSMahDist)
+		//	MaxSMahDist = smd;
+		//if (smd < MinSMahDist)
+		//	MinSMahDist = smd;
+		//SumSMahDist += smd;
 
-		AllLostSMahErrorVectors[i] = smd;
-		AllCorrSDistErrorVectors[i] = -1;
+		//AllLostSMahErrorVectors[i] = smd;
+		//AllCorrSDistErrorVectors[i] = -1;
 	}
 	else
 	{
@@ -791,10 +965,9 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 
 		AllLostMahErrorVectors[i] = -1;
 		AllCorrDistErrorVectors[i] = sqrt(distProj_c2c);
-		AllLostSMahErrorVectors[i] = -1;
-		AllCorrSDistErrorVectors[i] = distProj_c2c;
+		//AllLostSMahErrorVectors[i] = -1;
+		//AllCorrSDistErrorVectors[i] = distProj_c2c;
 	}
-	
 	
     if (cPar.bColor)
     {
@@ -805,6 +978,14 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
       max_colorRGB[0] = max(max_colorRGB[0], distColorRGB[0]);
       max_colorRGB[1] = max(max_colorRGB[1], distColorRGB[1]);
       max_colorRGB[2] = max(max_colorRGB[2], distColorRGB[2]);
+
+	  //P2D
+	  for (int i = 0; i < 3; i++)
+	  {
+		  SumMahColor[i] += md_c[i];
+		  //smd_c[i] = md_c[i] * md_c[i];
+		  //SumSMahColor[i] += smd_c[i];
+	  }
     }
     if (cPar.bLidar && cloudA.bLidar && cloudB.bLidar)
     {
@@ -817,6 +998,7 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
       if (rgb[n].size())
         NbNeighborsDst[n]++;
 #endif
+
 
     myMutex.unlock();
   }
@@ -832,9 +1014,11 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
   metric.c2c_mse = float( sse_dist_b_c2c / num );
   metric.c2p_hausdorff = float( max_dist_b_c2p );
   metric.c2c_hausdorff = float( max_dist_b_c2c );
-  
+ 
+  //Normalization for geometry
   double sumIllError = 0;
-  double sumIllSqError = 0;
+  //double sumIllSqError = 0;
+
   if (illCounter)
   {
 	  // normalize mahlanobis distances in range of point-to-point
@@ -842,21 +1026,22 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
 	  {
 		  if (AllLostMahErrorVectors[i] == -1)
 		  {
-			  //Normlaize in range of MAhalanobis
-			  sumIllError += (((AllCorrDistErrorVectors[i] - sqrt(min_dist_b_c2c)) / (sqrt(max_dist_b_c2c) - sqrt(min_dist_b_c2c))) * (MaxMahDist - MinMahDist)) + MinMahDist;  
-			  sumIllSqError += (((AllCorrSDistErrorVectors[i] - min_dist_b_c2c) / (max_dist_b_c2c - min_dist_b_c2c)) * (MaxSMahDist - MinSMahDist)) + MinSMahDist;
-		  
+			  //Normlaize in range of Mahalanobis
+			  sumIllError += (((AllCorrDistErrorVectors[i] - sqrt(min_dist_b_c2c)) / (sqrt(max_dist_b_c2c) - sqrt(min_dist_b_c2c))) * (MaxMahDist - MinMahDist)) + MinMahDist;
+			  //sumIllSqError += (((AllCorrSDistErrorVectors[i] - min_dist_b_c2c) / (max_dist_b_c2c - min_dist_b_c2c)) * (MaxSMahDist - MinSMahDist)) + MinSMahDist;
+
 			  //P2Po without Nomrmalization
 			  /*sumIllError += AllCorrDistErrorVectors[i];*/
-		  
+
 		  }
 	  }
   }
+
   SumMahDist += sumIllError;
   metric.mmd = double(SumMahDist / num);
 
-  SumSMahDist += sumIllSqError;
-  metric.msmd = double(SumSMahDist / num);
+  //SumSMahDist += sumIllSqError;
+  //metric.msmd = double(SumSMahDist / num);
 
   // from distance to PSNR. cloudA always the original
   metric.c2c_psnr = getPSNR( metric.c2c_mse, metric.pPSNR, 3 );
@@ -864,8 +1049,8 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
   metric.c2c_hausdorff_psnr = getPSNR( metric.c2c_hausdorff, metric.pPSNR, 3 );
   metric.c2p_hausdorff_psnr = getPSNR( metric.c2p_hausdorff, metric.pPSNR, 3 );
 
-  metric.mmd_psnr = getPSNR(metric.mmd * metric.mmd, metric.pPSNR, 3);
-  metric.msmd_psnr = getPSNR(metric.msmd, metric.pPSNR, 3);
+  metric.log_mmd = 10 * log10(1 + (1 / metric.mmd)); //getPSNR(metric.mmd * metric.mmd, metric.pPSNR, 3);
+  //metric.msmd_psnr = getPSNR(metric.msmd, metric.pPSNR, 3);
   
   if (cPar.bColor)
   {
@@ -873,23 +1058,48 @@ findMetric(PccPointCloud &cloudA, PccPointCloud &cloudB, commandPar &cPar, PccPo
     metric.color_mse[1] = float( sse_color[1] / num );
     metric.color_mse[2] = float( sse_color[2] / num );
 
+	metric.mmd_c[0] = double(SumMahColor[0] / num);
+	metric.mmd_c[1] = double(SumMahColor[1] / num);
+	metric.mmd_c[2] = double(SumMahColor[2] / num);
+	//metric.msmd_c[0] = double(SumSMahColor[0] / num);
+	//metric.msmd_c[1] = double(SumSMahColor[1] / num);
+	//metric.msmd_c[2] = double(SumSMahColor[2] / num);
+
     if (cPar.mseSpace == 1) //YCbCr
     {
       metric.color_psnr[0] = getPSNR(metric.color_mse[0], 1.0);
       metric.color_psnr[1] = getPSNR(metric.color_mse[1], 1.0);
       metric.color_psnr[2] = getPSNR(metric.color_mse[2], 1.0);
+	  metric.log_mmd_c[0] = 10 * log10(1 + (1 / metric.mmd_c[0])); //getPSNR(metric.mmd_c[0], 1.0);
+	  metric.log_mmd_c[1] = 10 * log10(1 + (1 / metric.mmd_c[1]));
+	  metric.log_mmd_c[2] = 10 * log10(1 + (1 / metric.mmd_c[2]));
+	  //metric.msmd_c_psnr[0] = getPSNR(metric.msmd_c[0], 1.0);
+	  //metric.msmd_c_psnr[1] = getPSNR(metric.msmd_c[1], 1.0);
+	  //metric.msmd_c_psnr[2] = getPSNR(metric.msmd_c[2], 1.0);
     }
     else if (cPar.mseSpace == 0) //RGB
     {
       metric.color_psnr[0] = getPSNR(metric.color_mse[0], 255);
       metric.color_psnr[1] = getPSNR(metric.color_mse[1], 255);
       metric.color_psnr[2] = getPSNR(metric.color_mse[2], 255);
+	  metric.log_mmd_c[0] = 10 * log10(1 + (1 / metric.mmd_c[0])); //getPSNR(metric.mmd_c[0], 255);
+	  metric.log_mmd_c[1] = 10 * log10(1 + (1 / metric.mmd_c[1]));
+	  metric.log_mmd_c[2] = 10 * log10(1 + (1 / metric.mmd_c[2]));
+	  //metric.msmd_c_psnr[0] = getPSNR(metric.msmd_c[0], 255);
+	  //metric.msmd_c_psnr[1] = getPSNR(metric.msmd_c[1], 255);
+	  //metric.msmd_c_psnr[2] = getPSNR(metric.msmd_c[2], 255);
     }
     else if (cPar.mseSpace == 8) // YCoCg-R
     {
       metric.color_psnr[0] = getPSNR(metric.color_mse[0], 255);
       metric.color_psnr[1] = getPSNR(metric.color_mse[1], 511);
       metric.color_psnr[2] = getPSNR(metric.color_mse[2], 511);
+	  metric.log_mmd_c[0] = 10 * log10(1 + (1 / metric.mmd_c[0])); //getPSNR(metric.mmd_c[0], 255);
+	  metric.log_mmd_c[1] = 10 * log10(1 + (1 / metric.mmd_c[1]));
+	  metric.log_mmd_c[2] = 10 * log10(1 + (1 / metric.mmd_c[2]));
+	  //metric.msmd_c_psnr[0] = getPSNR(metric.msmd_c[0], 255);
+	  //metric.msmd_c_psnr[1] = getPSNR(metric.msmd_c[1], 511);
+	  //metric.msmd_c_psnr[2] = getPSNR(metric.msmd_c[2], 511);
     }
 
     metric.color_rgb_hausdorff[0] = float( max_colorRGB[0] );
@@ -959,9 +1169,13 @@ qMetric::qMetric()
 {
   //point-to-distribution
   mmd = 0.0;
-  msmd = 0.0;
-  mmd_psnr = 0;
-  msmd_psnr = 0;
+  //msmd = 0.0;
+  log_mmd = 0;
+  //msmd_psnr = 0;
+  mmd_c[0] = mmd_c[1] = mmd_c[2] = 0;
+  //msmd_c[0] = msmd_c[1] = msmd_c[2] = 0;
+  log_mmd_c[0] = log_mmd_c[1] = log_mmd_c[2] = 0;
+  //msmd_c_psnr[0] = msmd_c_psnr[1] = msmd_c_psnr[2] = 0;
 	
   c2c_mse = 0; c2c_hausdorff = 0;
   c2p_mse = 0; c2p_hausdorff = 0;
@@ -1062,9 +1276,9 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
   cout << "   mse1      (p2point): " << metricA.c2c_mse << endl;
   cout << "   mse1,PSNR (p2point): " << metricA.c2c_psnr << endl;
   cout << "   mmd       (p2distr): " << metricA.mmd << endl;
-  cout << "   mmd,PSNR  (p2distr): " << metricA.mmd_psnr << endl;
-  cout << "   msmd      (p2distr): " << metricA.msmd << endl;
-  cout << "   msmd,PSNR (p2distr): " << metricA.msmd_psnr << endl;
+  cout << "   mmd,LOG   (p2distr): " << metricA.log_mmd << endl;
+  //cout << "   msmd      (p2distr): " << metricA.msmd << endl;
+  //cout << "   msmd,PSNR (p2distr): " << metricA.msmd_psnr << endl;
   
   if (!cPar.c2c_only)
   {
@@ -1083,12 +1297,24 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
   }
   if ( cPar.bColor )
   {
-    cout << "   c[0],    1         : " << metricA.color_mse[0] << endl;
-    cout << "   c[1],    1         : " << metricA.color_mse[1] << endl;
-    cout << "   c[2],    1         : " << metricA.color_mse[2] << endl;
-    cout << "   c[0],PSNR1         : " << metricA.color_psnr[0] << endl;
-    cout << "   c[1],PSNR1         : " << metricA.color_psnr[1] << endl;
-    cout << "   c[2],PSNR1         : " << metricA.color_psnr[2] << endl;
+    cout << "   c[0],         1       : " << metricA.color_mse[0] << endl;
+    cout << "   c[1],         1       : " << metricA.color_mse[1] << endl;
+    cout << "   c[2],         1       : " << metricA.color_mse[2] << endl;
+    cout << "   c[0],     PSNR1       : " << metricA.color_psnr[0] << endl;
+    cout << "   c[1],     PSNR1       : " << metricA.color_psnr[1] << endl;
+    cout << "   c[2],     PSNR1       : " << metricA.color_psnr[2] << endl;
+	cout << "   mmdColor[0],  1       : " << metricA.mmd_c[0] << endl;
+	cout << "   mmdColor[1],  1       : " << metricA.mmd_c[1] << endl;
+	cout << "   mmdColor[2],  1       : " << metricA.mmd_c[2] << endl;
+	//cout << "   msmdColor[0], 1      : " << metricA.msmd_c[0] << endl;
+	//cout << "   msmdColor[1], 1      : " << metricA.msmd_c[1] << endl;
+	//cout << "   msmdColor[2], 1      : " << metricA.msmd_c[2] << endl;
+	cout << "   mmdColor[0], LOG1    : " << metricA.log_mmd_c[0] << endl;
+	cout << "   mmdColor[1], LOG1    : " << metricA.log_mmd_c[1] << endl;
+	cout << "   mmdColor[2], LOG1    : " << metricA.log_mmd_c[2] << endl;
+	//cout << "   msmdColor[0],PSNR1   : " << metricA.msmd_c_psnr[0] << endl;
+	//cout << "   msmdColor[1],PSNR1   : " << metricA.msmd_c_psnr[1] << endl;
+	//cout << "   msmdColor[2],PSNR1   : " << metricA.msmd_c_psnr[2] << endl;
     if ( cPar.hausdorff )
     {
       cout << " h.c[0],    1         : " << metricA.color_rgb_hausdorff[0] << endl;
@@ -1121,9 +1347,9 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     cout << "   mse2      (p2point): " << metricB.c2c_mse << endl;
     cout << "   mse2,PSNR (p2point): " << metricB.c2c_psnr << endl;
 	cout << "   mmd       (p2distr): " << metricB.mmd << endl;
-	cout << "   mmd,PSNR  (p2distr): " << metricB.mmd_psnr << endl;
-	cout << "   msmd      (p2distr): " << metricB.msmd << endl;
-	cout << "   msmd,PSNR (p2distr): " << metricB.msmd_psnr << endl;
+	cout << "   mmd,LOG   (p2distr): " << metricB.log_mmd << endl;
+	//cout << "   msmd      (p2distr): " << metricB.msmd << endl;
+	//cout << "   msmd,PSNR (p2distr): " << metricB.msmd_psnr << endl;
     if (!cPar.c2c_only)
     {
       cout << "   mse2      (p2plane): " << metricB.c2p_mse << endl;
@@ -1141,12 +1367,24 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     }
     if ( cPar.bColor)
     {
-      cout << "   c[0],    2         : " << metricB.color_mse[0] << endl;
-      cout << "   c[1],    2         : " << metricB.color_mse[1] << endl;
-      cout << "   c[2],    2         : " << metricB.color_mse[2] << endl;
-      cout << "   c[0],PSNR2         : " << metricB.color_psnr[0] << endl;
-      cout << "   c[1],PSNR2         : " << metricB.color_psnr[1] << endl;
-      cout << "   c[2],PSNR2         : " << metricB.color_psnr[2] << endl;
+      cout << "   c[0],         2      : " << metricB.color_mse[0] << endl;
+      cout << "   c[1],         2      : " << metricB.color_mse[1] << endl;
+      cout << "   c[2],         2      : " << metricB.color_mse[2] << endl;
+      cout << "   c[0],     PSNR2      : " << metricB.color_psnr[0] << endl;
+      cout << "   c[1],     PSNR2      : " << metricB.color_psnr[1] << endl;
+      cout << "   c[2],     PSNR2      : " << metricB.color_psnr[2] << endl;
+	  cout << "   mmdColor[0],  2      : " << metricB.mmd_c[0] << endl;
+	  cout << "   mmdColor[1],  2      : " << metricB.mmd_c[1] << endl;
+	  cout << "   mmdColor[2],  2      : " << metricB.mmd_c[2] << endl;
+	  //cout << "   msmdColor[0], 2      : " << metricB.msmd_c[0] << endl;
+	  //cout << "   msmdColor[1], 2      : " << metricB.msmd_c[1] << endl;
+	  //cout << "   msmdColor[2], 2      : " << metricB.msmd_c[2] << endl;
+	  cout << "   mmdColor[0], LOG2    : " << metricB.log_mmd_c[0] << endl;
+	  cout << "   mmdColor[1], LOG2    : " << metricB.log_mmd_c[1] << endl;
+	  cout << "   mmdColor[2], LOG2    : " << metricB.log_mmd_c[2] << endl;
+	  //cout << "   msmdColor[0],PSNR2   : " << metricB.msmd_c_psnr[0] << endl;
+	  //cout << "   msmdColor[1],PSNR2   : " << metricB.msmd_c_psnr[1] << endl;
+	  //cout << "   msmdColor[2],PSNR2   : " << metricB.msmd_c_psnr[2] << endl;
       if ( cPar.hausdorff)
       {
         cout << " h.c[0],    2         : " << metricB.color_rgb_hausdorff[0] << endl;
@@ -1182,10 +1420,9 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
 
     //point-to-distribution
     qual_metric.mmd = max(metricA.mmd, metricB.mmd);
-    qual_metric.msmd = max(metricA.msmd, metricB.msmd);
-    qual_metric.mmd_psnr = min(metricA.mmd_psnr, metricB.mmd_psnr);
-    qual_metric.msmd_psnr = min(metricA.msmd_psnr, metricB.msmd_psnr);
-
+    //qual_metric.msmd = max(metricA.msmd, metricB.msmd);
+    qual_metric.log_mmd = min(metricA.log_mmd, metricB.log_mmd);
+    //qual_metric.msmd_psnr = min(metricA.msmd_psnr, metricB.msmd_psnr);
     if ( cPar.bColor )
     {
       qual_metric.color_mse[0] = max( metricA.color_mse[0], metricB.color_mse[0] );
@@ -1203,6 +1440,20 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
       qual_metric.color_rgb_hausdorff_psnr[0] = min( metricA.color_rgb_hausdorff_psnr[0], metricB.color_rgb_hausdorff_psnr[0] );
       qual_metric.color_rgb_hausdorff_psnr[1] = min( metricA.color_rgb_hausdorff_psnr[1], metricB.color_rgb_hausdorff_psnr[1] );
       qual_metric.color_rgb_hausdorff_psnr[2] = min( metricA.color_rgb_hausdorff_psnr[2], metricB.color_rgb_hausdorff_psnr[2] );
+
+	  //point-to-distribution
+	  qual_metric.mmd_c[0] = max(metricA.mmd_c[0], metricB.mmd_c[0]);
+	  qual_metric.mmd_c[1] = max(metricA.mmd_c[1], metricB.mmd_c[1]);
+	  qual_metric.mmd_c[2] = max(metricA.mmd_c[2], metricB.mmd_c[2]);
+	  //qual_metric.msmd_c[0] = max(metricA.msmd_c[0], metricB.msmd_c[0]);
+	  //qual_metric.msmd_c[1] = max(metricA.msmd_c[1], metricB.msmd_c[1]);
+	  //qual_metric.msmd_c[2] = max(metricA.msmd_c[2], metricB.msmd_c[2]);
+	  qual_metric.log_mmd_c[0] = min(metricA.log_mmd_c[0], metricB.log_mmd_c[0]);
+	  qual_metric.log_mmd_c[1] = min(metricA.log_mmd_c[1], metricB.log_mmd_c[1]);
+	  qual_metric.log_mmd_c[2] = min(metricA.log_mmd_c[2], metricB.log_mmd_c[2]);
+	  //qual_metric.msmd_c_psnr[0] = min(metricA.msmd_c_psnr[0], metricB.msmd_c_psnr[0]);
+	  //qual_metric.msmd_c_psnr[1] = min(metricA.msmd_c_psnr[1], metricB.msmd_c_psnr[1]);
+	  //qual_metric.msmd_c_psnr[2] = min(metricA.msmd_c_psnr[2], metricB.msmd_c_psnr[2]);
     }
     if ( cPar.bLidar )
     {
@@ -1216,9 +1467,9 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     cout << "   mseF      (p2point): " << qual_metric.c2c_mse << endl;
     cout << "   mseF,PSNR (p2point): " << qual_metric.c2c_psnr << endl;
 	cout << "   mmd       (p2distr): " << qual_metric.mmd << endl;
-	cout << "   mmd,PSNR  (p2distr): " << qual_metric.mmd_psnr << endl;
-	cout << "   msmd      (p2distr): " << qual_metric.msmd << endl;
-	cout << "   msmd,PSNR (p2distr): " << qual_metric.msmd_psnr << endl;
+	cout << "   mmd,LOG   (p2distr): " << qual_metric.log_mmd << endl;
+	//cout << "   msmd      (p2distr): " << qual_metric.msmd << endl;
+	//cout << "   msmd,PSNR (p2distr): " << qual_metric.msmd_psnr << endl;
 	
     if (!cPar.c2c_only)
     {
@@ -1237,12 +1488,24 @@ pcc_quality::computeQualityMetric(PccPointCloud &cloudA, PccPointCloud &cloudNor
     }
     if ( cPar.bColor )
     {
-      cout << "   c[0],    F         : " << qual_metric.color_mse[0] << endl;
-      cout << "   c[1],    F         : " << qual_metric.color_mse[1] << endl;
-      cout << "   c[2],    F         : " << qual_metric.color_mse[2] << endl;
-      cout << "   c[0],PSNRF         : " << qual_metric.color_psnr[0] << endl;
-      cout << "   c[1],PSNRF         : " << qual_metric.color_psnr[1] << endl;
-      cout << "   c[2],PSNRF         : " << qual_metric.color_psnr[2] << endl;
+      cout << "   c[0],         F      : " << qual_metric.color_mse[0] << endl;
+      cout << "   c[1],         F      : " << qual_metric.color_mse[1] << endl;
+      cout << "   c[2],         F      : " << qual_metric.color_mse[2] << endl;
+      cout << "   c[0],     PSNRF      : " << qual_metric.color_psnr[0] << endl;
+      cout << "   c[1],     PSNRF      : " << qual_metric.color_psnr[1] << endl;
+      cout << "   c[2],     PSNRF      : " << qual_metric.color_psnr[2] << endl;
+	  cout << "   mmdColor[0],  F      : " << qual_metric.mmd_c[0] << endl;
+	  cout << "   mmdColor[1],  F      : " << qual_metric.mmd_c[1] << endl;
+	  cout << "   mmdColor[2],  F      : " << qual_metric.mmd_c[2] << endl;
+	  //cout << "   msmdColor[0],    F      : " << qual_metric.msmd_c[0] << endl;
+	  //cout << "   msmdColor[1],    F      : " << qual_metric.msmd_c[1] << endl;
+	  //cout << "   msmdColor[2],    F      : " << qual_metric.msmd_c[2] << endl;
+	  cout << "   mmdColor[0], LOGF    : " << qual_metric.log_mmd_c[0] << endl;
+	  cout << "   mmdColor[1], LOGF    : " << qual_metric.log_mmd_c[1] << endl;
+	  cout << "   mmdColor[2], LOGF    : " << qual_metric.log_mmd_c[2] << endl;
+	  //cout << "   msmdColor[0],PSNRF      : " << qual_metric.msmd_c_psnr[0] << endl;
+	  //cout << "   msmdColor[1],PSNRF      : " << qual_metric.msmd_c_psnr[1] << endl;
+	  //cout << "   msmdColor[2],PSNRF      : " << qual_metric.msmd_c_psnr[2] << endl;
       if ( cPar.hausdorff )
       {
         cout << " h.c[0],    F         : " << qual_metric.color_rgb_hausdorff[0] << endl;
