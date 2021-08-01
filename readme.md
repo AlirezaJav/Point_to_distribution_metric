@@ -69,56 +69,65 @@
   <tr>
     <td>Feature-Based</td>
     <td>d<sub>gc</sub></td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>92.0</td>
+    <td>90.4</td>
+    <td>0.585</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
     <td>H<sup>Y</sup><sub>L2</sub></td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>88.4</td>
+    <td>85.3</td>
+    <td>0.710</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
     <td>PCM<sub>RR</sub>(MCCV)</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>D90.7oe</td>
+    <td>90.2</td>
+    <td>0.573</td>
   </tr>
   <tr>
     <td>Point-to_Distribution</td>
     <td>P2D-G</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>89.0</td>
+    <td>87.3</td>
+    <td>0.663</td>
   </tr>
   <tr>
     <td>Point-to_Distribution</td>
     <td>LogP2D-G</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>89.0</td>
+    <td>87.3</td>
+    <td>0.664</td>
   </tr>
   <tr>
     <td>Point-to_Distribution</td>
     <td>P2D-Y</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>89.3</td>
+    <td>90.5</td>
+    <td>0.578</td>
   </tr>
   <tr>
     <td>Point-to_Distribution</td>
     <td>LogP2D-Y</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td>89.3</td>
+    <td>90.7</td>
+    <td>0.574</td>
   </tr>
   <tr>
     <td>Point-to_Distribution</td>
     <td>P2D-JGY</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td><b>93.8</b></td>
+    <td><b>92.9</b></td>
+    <td>0.503</td>
   </tr>
   <tr>
     <td>Point-to_Distribution</td>
     <td>LogP2D-JGY</td>
-    <td>Doe</td>
-    <td>80</td>
+    <td><b>93.8</b></td>
+    <td><b>92.9</b></td>
+    <td><b>0.502</b></td>
   </tr>
 </table>
    
