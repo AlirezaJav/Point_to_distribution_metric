@@ -74,7 +74,7 @@
   </tr>
   <tr>
     <td>Feature-Based</td>
-    <td>(H<sup>Y</sup>)<sub>L2</sub></td>
+    <td>H<sup>Y</sup><sub>L2</sub></td>
     <td>Doe</td>
     <td>80</td>
   </tr>
