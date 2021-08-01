@@ -2,7 +2,29 @@
 <b>Introduction</b>
 <p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
 <p> Below table shows the objective-Subjective correlation performance of this metric, compared with most famous state-of-the-art metrics using the MOS scores provied in <a href="https://www.epfl.ch/labs/mmspg/downloads/quality-assessment-for-point-cloud-compression">M-PCCD</a> dataset. </p>
-
+<table style="width:50%" align="center">
+  <tr>
+    <th>Metric</th>
+    <th>SROCC</th> 
+    <th>PLCC</th>
+    <th>RMSE</th>
+  </tr>
+  <tr>
+    <td>D1-PSNR</td>
+    <td>Smith</td>
+    <td>50</td>
+  </tr>
+  <tr>
+    <td>GH 98% PSNR </td>
+    <td>Jackson</td>
+    <td>94</td>
+  </tr>
+  <tr>
+    <td>RA-PSNR (APD10)</td>
+    <td>Doe</td>
+    <td>80</td>
+  </tr>
+</table>
    
    
 <b>Compiling instructions</b>
