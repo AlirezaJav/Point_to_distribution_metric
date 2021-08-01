@@ -1,6 +1,46 @@
 # Point to Distribution Metric
 <b>Introduction</b>
 <p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
+<p> software reports a distance metric and a logarithmic distance metric for geometry, color and joint metric as follows:
+<table style="width:50%">
+  <tr>
+    <th>Metric Name</th>
+    <th>Software Output Name</th>
+  </tr>
+  <tr>
+    <td>P2D-G</td>
+    <td>mmd</td>
+  </tr>
+  <tr>
+    <td>LogP2D-G</td>
+    <td>mmd, LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-Y</td>
+    <td>mmdColor[0]</td>
+  </tr>
+  <tr>
+    <td>LogP2D-Y</td>
+    <td>mmdColor[0], LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-Cb</td>
+    <td>mmdColor[1]</td>
+  </tr>
+  <tr>
+    <td>LogP2D-Cb</td>
+    <td>mmdColor[1], LOG</td>
+  </tr>
+  <tr>
+    <td>P2D-Cr</td>
+    <td>mmdColor[2]</td>
+  </tr>
+  <tr>
+    <td>LogP2D-Cr</td>
+    <td>mmdColor[2], LOG</td>
+  </tr>
+</table>
+</p>
 <p> Below table shows the objective-Subjective correlation performance of this metric, compared with most famous state-of-the-art metrics using the MOS scores provied in <a href="https://www.epfl.ch/labs/mmspg/downloads/quality-assessment-for-point-cloud-compression">M-PCCD</a> dataset. </p>
 <table style="width:50%" align="center">
   <tr>
