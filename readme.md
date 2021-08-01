@@ -19,14 +19,14 @@
   </tr>
   <tr>
     <td>Point-to-Point</td>
-    <td>GH 98% PSNR</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123087/">GH 98% PSNR</a></td>
     <td>86.9</td>
     <td>84.6</td>
     <td>0.726</td>
   </tr>
   <tr>
     <td>Point-to-Point</td>
-    <td>RA-PSNR (APD<sub>10</sub>)</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9191233">RA-PSNR (APD<sub>10</sub>)</a></td>
     <td>90.2</td>
     <td>88.8</td>
     <td>0.626</td>
@@ -47,43 +47,43 @@
   </tr>
   <tr>
     <td>Point-to-Plane</td>
-    <td>GH 98% PSNR</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123087/">GH 98% PSNR</a></td>
     <td>87.9</td>
     <td>84.3</td>
     <td>0.731</td>
   </tr>
   <tr>
     <td>Point-to-Plane</td>
-    <td>RA-PSNR (APD<sub>10</sub>)</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9191233">RA-PSNR (APD<sub>10</sub>)</a></td>
     <td>89.9</td>
     <td>88.9</td>
     <td>0.622</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
-    <td>PointSSIM</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9106005">PointSSIM</a></td>
     <td>91.8</td>
     <td>92.6</td>
     <td>0.514</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
-    <td>d<sub>gc</sub></td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123089">d<sub>gc</sub></a></td>
     <td>92.0</td>
     <td>90.4</td>
     <td>0.585</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
-    <td>H<sup>Y</sup><sub>L2</sub></td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9123089">H<sup>Y</sup><sub>L2</sub></a></td>
     <td>88.4</td>
     <td>85.3</td>
     <td>0.710</td>
   </tr>
   <tr>
     <td>Feature-Based</td>
-    <td>PCM<sub>RR</sub>(MCCV)</td>
-    <td>D90.7oe</td>
+    <td><a href="https://ieeexplore.ieee.org/abstract/document/9198142">PCM<sub>RR</sub>(MCCV)</a></td>
+    <td>90.7</td>
     <td>90.2</td>
     <td>0.573</td>
   </tr>
