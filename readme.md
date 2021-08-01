@@ -1,5 +1,5 @@
 # Point to Distribution Metric
-<b> Introduction </b>
+<b>Introduction</b>
    A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.
    
 <b>Compiling instructions</b>
