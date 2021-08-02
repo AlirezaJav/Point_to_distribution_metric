@@ -2,7 +2,7 @@
 <b>Introduction</b>
 <p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
 <p> The software reports a distance metric and a logarithmic distance metric for geometry, color and joint metric as follows:
-<table style="width:50%">
+<table style="width:50%" align="center">
   <tr>
     <th>Metric Name</th>
     <th>Software Output Name</th>
