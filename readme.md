@@ -253,6 +253,6 @@
 
 <p>If you are using this metric, please cite the following publications:</p>
 
-A. Javaheri, C. Brites, F. Pereira and J. Ascenso, <a href="https://arxiv.org/abs/2108.00054">"A Point-to-Distribution Joint Geometry and Color Metric for Point Cloud Quality Assessment,"</a> arXiv preprint arXiv:2108.00054, August 2021.
+A. Javaheri, C. Brites, F. Pereira and J. Ascenso, <a href="https://arxiv.org/abs/2108.00054">"A Point-to-Distribution Joint Geometry and Color Metric for Point Cloud Quality Assessment,"</a> <i>arXiv preprint arXiv:2108.00054</i>, August 2021.
 
-A. Javaheri, C. Brites, F. Pereira and J. Ascenso, <a href="https://ieeexplore.ieee.org/document/9143408?title=Main_Page">"Mahalanobis Based Point to Distribution Metric for Point Cloud Geometry Quality Evaluation,"</a> IEEE Signal Processing Letters, vol. 27, pp. 1350-1354, 2020, doi: 10.1109/LSP.2020.3010128.
+A. Javaheri, C. Brites, F. Pereira and J. Ascenso, <a href="https://ieeexplore.ieee.org/document/9143408?title=Main_Page">"Mahalanobis Based Point to Distribution Metric for Point Cloud Geometry Quality Evaluation,"</a> <i>IEEE Signal Processing Letters</i>, vol. 27, pp. 1350-1354, 2020, doi: 10.1109/LSP.2020.3010128.
