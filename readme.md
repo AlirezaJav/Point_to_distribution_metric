@@ -1,11 +1,20 @@
 # Point-to-Distribution Point Cloud Quality Metric
 <b>Introduction</b>
-<p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture, individually and jointly. This new quality metric exploits the      scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
-<p> The software reports a distance metric and a logarithmic distance metric for geometry, color and joint metric as follows:
+<p>A novel point-to-distribution metric for PC quality assessment considering both the geometry and texture jointly. This new quality metric exploits the scale-invariance property of the Mahalanobis distance to assess first the geometry and color point-to-distribution distortions, which are after fused to obtain a joint geometry and color quality metric.</p>
+<p> The software reports a distance metric (<b>mmdJoint</b>) and a logarithmic distance metric (<b>mmdJoint,log</b>). The software also reports these two distances for geoemtry and color (any color component) individually. However, the best performance acquired measuring color and geometry distortions jointly. All these distances are reported in the table below. The best that should be used for any further evaluation is shown in bold. </p>
+
 <table style="width:50%" align="center">
   <tr>
     <th>Metric Name</th>
     <th>Software Output Name</th>
+  </tr>
+  <tr>
+    <td><b>P2D-JGY</b></td>
+    <td>mmdJoint</td>
+  </tr>
+  <tr>
+    <td><b>LogP2D-JGY</b></td>
+    <td>mmdJoint, LOG</td>
   </tr>
   <tr>
     <td>P2D-G</td>
@@ -38,14 +47,6 @@
   <tr>
     <td>LogP2D-Cr</td>
     <td>mmdColor[2], LOG</td>
-  </tr>
-  <tr>
-    <td>P2D-JGY</td>
-    <td>mmdJoint</td>
-  </tr>
-  <tr>
-    <td>LogP2D-JGY</td>
-    <td>mmdJoint, LOG</td>
   </tr>
 </table>
 </p>
