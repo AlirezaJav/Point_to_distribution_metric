@@ -48,7 +48,7 @@
 #include <sstream>
 #include <limits.h>
 
-#include <Eigen\Dense>
+#include <eigen3/Eigen/Dense>
 #include <math.h> 
 #include <numeric>
 
