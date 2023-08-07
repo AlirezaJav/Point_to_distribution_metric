@@ -58,28 +58,27 @@
    CMakeLists.txt is provided for cmake to generate makefiles. General
    practice using cmake should be followed in order to compile the
    program. Suggested steps to compile under Debug mode are shown below.
+   
+   Install eigen:
+   ```console
+   :$ sudo apt install libeigen3-dev
+   ```
+   Then follow the build instructions:
    ```console
    :$ cd /path/to/root/folder/of/the/source/code/
-   ```
-   ```console
-   :$ ls changes.txt  readme.txt  source  test
-   ```
-   
-   ```console
-   :$ mkdir debug
-   ```
-   
-   ```console
-   :$ cd debug
-   ```
-   ```console
-   :$ cmake -DCMAKE_BUILD_TYPE=Debug ../source
+   :$ mkdir build && cd build
+   :$ cmake ../source
+   :$ make
+   "pc_error" to be generated under ./build folder
    ```
    
    You may want to specify the location of a pariticular Boost version,
    e.g., via -DBOOST_ROOT=/path/to/boost_1_63_0
 
+   DEBUG build:
    ```console
+   :$ mkdir debug && cd debug
+   :$ cmake -DCMAKE_BUILD_TYPE=Debug ../source
    :$ make
    "pc_error_d" to be generated under ./test folder
    ```
@@ -87,7 +86,7 @@
 <b> usage </b>
 
    ```console
-   ./test/pc_error  [--help] [-c config.cfg] [--parameter=value]
+   ./build/pc_error  [--help] [-c config.cfg] [--parameter=value]
    ```
 
    The metrics takes as input a PLY files: source(A), test(B) and size of the distribution in target PC 
@@ -98,7 +97,7 @@
    Example:
    
    ```console
-   ./test/pc_error 
+   ./build/pc_error 
    --fileA=./queen/frame_0010.ply 
    --fileB=./S22C2AIR01_queen_dec_0010.ply 
    --distSize=31
